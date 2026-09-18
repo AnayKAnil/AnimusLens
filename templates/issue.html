@@ -1,0 +1,572 @@
+{% extends "layout.html" %}
+{% block title %}Issue Certificate - SECURE-Cert{% endblock %}
+{% block content %}
+<style>
+/* --- Hero Section Specific Dark Mode Override --- */
+[data-theme="dark"] .animation-hero {
+    background: var(--dark-color);
+}
+
+/* --- 3D Animated Boxes Styles --- */
+.animation-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.icontainer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  width: 20em;
+  height: 20em;
+}
+
+.holder {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) translate3d(0em, 3em, 1.5em);
+  transform-style: preserve-3d;
+  width: 100%;
+  height: 100%;
+}
+
+.holder:nth-child(2) {
+  transform: translate(-50%, -50%) rotateY(-90deg) rotateX(90deg) translate3d(0, 3em, 1.5em);
+}
+.holder:nth-child(3) {
+  transform: translate(-50%, -50%) rotateZ(-90deg) rotateX(-90deg) translate3d(0, 3em, 1.5em);
+}
+
+.box {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-style: preserve-3d;
+  animation: ani-box 6s infinite ease-in-out;
+  width: 3em;
+  height: 3em;
+}
+
+.box:before,
+.box:after {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  content: "";
+}
+
+.holder:nth-child(1) .box { background-color: rgba(99, 102, 241, 0.5); }
+.holder:nth-child(1) .box:before { background-color: rgba(79, 70, 229, 0.5); }
+.holder:nth-child(1) .box:after { background-color: rgba(139, 92, 246, 0.5); }
+
+.holder:nth-child(2) .box { background-color: rgba(100, 255, 218, 0.5); }
+.holder:nth-child(2) .box:before { background-color: rgba(94, 234, 212, 0.5); }
+.holder:nth-child(2) .box:after { background-color: rgba(176, 222, 159, 0.5); }
+
+.holder:nth-child(3) .box { background-color: rgba(239, 68, 68, 0.5); }
+.holder:nth-child(3) .box:before { background-color: rgba(220, 38, 38, 0.5); }
+.holder:nth-child(3) .box:after { background-color: rgba(240, 139, 172, 0.5); }
+
+.box:before {
+  left: 100%;
+  bottom: 0;
+  transform: rotateY(90deg);
+  transform-origin: 0 50%;
+}
+.box:after {
+  left: 0;
+  bottom: 100%;
+  transform: rotateX(90deg);
+  transform-origin: 0 100%;
+}
+
+@keyframes ani-box {
+  0%, 100% { transform: translate3d(0, 0, 0) scale3d(1, 1, 1); }
+  16.66% { transform: translate3d(-3em, 0, 0) scale3d(0.85, 0.85, 1.1); }
+  33.33% { transform: translate3d(-3em, -3em, 0) scale3d(1.1, 0.85, 0.85); }
+  50% { transform: translate3d(0, -3em, 0) scale3d(0.85, 1.1, 0.85); }
+  66.66% { transform: translate3d(0, -3em, -3em) scale3d(0.85, 0.85, 1.1); }
+  83.33% { transform: translate3d(0, 0, -3em) scale3d(1.1, 0.85, 0.85); }
+}
+
+@media (max-width: 992px) {
+  .icontainer {
+    width: 15em;
+    height: 15em;
+    perspective: 800px;
+  }
+  .box {
+    animation-duration: 7s;
+  }
+}
+
+@media (max-width: 768px) {
+  .animation-bg {
+    display: none;
+  }
+}
+
+/* --- Hero Styles --- */
+.animation-hero {
+    position: relative;
+    width: 100%;
+    background: var(--gradient-hero);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 4rem 0;
+    z-index: 0;
+    min-height: 50vh;
+}
+
+.animation-hero .hero-content {
+    position: relative;
+    z-index: 1;
+    color: var(--text-primary);
+    text-align: center;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 1rem;
+    border-radius: var(--border-radius-md);
+    margin: 0 1rem;
+    display: inline-block;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-title {
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.hero-subtitle {
+    font-size: 1rem;
+    opacity: 0.9;
+    color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+  .animation-hero {
+      padding: 2rem 0;
+      min-height: 40vh;
+  }
+}
+</style>
+
+<section class="animation-hero position-relative">
+  <div class="animation-bg">
+    <div class="icontainer">
+      <div class="holder"><div class="box"></div></div>
+      <div class="holder"><div class="box"></div></div>
+      <div class="holder"><div class="box"></div></div>
+    </div>
+    <div class="floating-logo">
+      <img src="{{ url_for('static', filename='animus-logo.png') }}" alt="ANIMUS Logo">
+    </div>
+  </div>
+
+  <div class="container text-center hero-content">
+    <h1 class="hero-title" data-aos="fade-up">University Certificate Issuance</h1>
+    <p class="hero-subtitle" data-aos="fade-up" data-aos-delay="100">
+      Anchor tamper-proof credentials to the local blockchain
+    </p>
+  </div>
+</section>
+
+<section class="form-section">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 col-xl-6">
+
+        <!-- Card 1: Single Certificate Issuance -->
+        <div class="form-container mb-4" data-aos="fade-up" role="region" aria-labelledby="formHeader">
+          <div class="form-header">
+            <div class="form-icon">
+              <i class="fas fa-plus-circle" aria-hidden="true"></i>
+            </div>
+            <h2 id="formHeader">Issue Single Certificate</h2>
+            <p>Direct manual issuance via connected administrator wallet</p>
+          </div>
+          
+          <form method="post" enctype="multipart/form-data" class="certificate-form" id="issueForm">
+            <div class="form-group">
+              <label class="form-label" for="student_wallet">
+                <i class="fas fa-wallet" aria-hidden="true"></i> Student Wallet Address
+              </label>
+              <input type="text" id="student_wallet" class="form-control" placeholder="0x..." required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="cert_id">
+                <i class="fas fa-tag" aria-hidden="true"></i> Certificate ID
+              </label>
+              <input type="text" name="cert_id" id="cert_id" class="form-control" placeholder="e.g. CERT-101" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="txid_note">
+                <i class="fas fa-sticky-note" aria-hidden="true"></i> Metadata / IPFS URI
+              </label>
+              <input type="text" name="txid_note" id="txid_note" class="form-control" placeholder="ipfs://Qm... or student identifier">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="fileInput">
+                <i class="fas fa-file-upload" aria-hidden="true"></i> Certificate File
+              </label>
+              <div class="file-upload-area" id="fileUploadArea" role="button" tabindex="0">
+                <input type="file" name="file" id="fileInput" class="file-input" accept=".pdf,.jpg,.jpeg,.png" required>
+                <div class="file-upload-content">
+                  <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                  <p>Drag and drop or click to upload</p>
+                  <div class="file-types">Supported: .pdf, .jpg, .jpeg, .png</div>
+                </div>
+              </div>
+              <div class="file-preview" id="filePreview" style="display:none;">
+                <div class="file-info">
+                  <i class="fas fa-file-alt" aria-hidden="true"></i>
+                  <span class="file-name"></span>
+                  <span class="file-size"></span>
+                </div>
+                <button type="button" class="btn-remove" onclick="removeFile()" aria-label="Remove uploaded file">
+                  <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-submit" id="submitBtn" disabled>
+              <i class="fas fa-plus-circle" aria-hidden="true"></i> Issue Single Certificate
+            </button>
+          </form>
+
+          <div class="processing-overlay" id="processingOverlay" style="display:none;">
+            <div class="processing-content">
+              <div class="spinner"></div>
+              <h4>Processing Transaction</h4>
+              <p>Submitting credential to blockchain...</p>
+              <div class="processing-steps">
+                <div class="step" id="stepHash"><i class="fas fa-calculator"></i> Computing SHA-256 hash</div>
+                <div class="step" id="stepMetaMask"><i class="fas fa-wallet"></i> Awaiting MetaMask confirmation</div>
+                <div class="step" id="stepBlockchain"><i class="fas fa-link"></i> Recording on blockchain</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="statusMessage" class="toast-container" role="alert" aria-live="assertive"></div>
+        </div>
+
+        <!-- Card 2: Automated Batch CSV Issuance -->
+        <div class="form-container" data-aos="fade-up" data-aos-delay="100">
+          <div class="form-header">
+            <div class="form-icon">
+              <i class="fas fa-layer-group" aria-hidden="true"></i>
+            </div>
+            <h2>Automated Batch Issuance</h2>
+            <p>Upload a roster CSV to issue dozens or hundreds of certificates in a single transaction</p>
+          </div>
+
+          <form id="batchForm">
+            <div class="form-group mb-3">
+              <label class="form-label" for="csvFile">
+                <i class="fas fa-file-csv"></i> Select Graduate Roster (.csv)
+              </label>
+              <input type="file" id="csvFile" name="csv_file" class="form-control" accept=".csv" required />
+              <div class="form-text text-muted mt-2">
+                Header columns required: <code>wallet, cert_id, name, ipfs_uri</code>
+              </div>
+            </div>
+            <button type="button" class="btn btn-success btn-submit" id="batchBtn" onclick="processBatch()">
+              <i class="fas fa-bolt"></i> Process & Batch Mint
+            </button>
+          </form>
+          <div id="batchStatus" class="mt-3"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.7.0/dist/web3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script>
+const fileInput = document.getElementById('fileInput');
+const fileUploadArea = document.getElementById('fileUploadArea');
+const filePreview = document.getElementById('filePreview');
+const submitBtn = document.getElementById('submitBtn');
+const certIdInput = document.getElementById('cert_id');
+const studentWalletInput = document.getElementById('student_wallet');
+const statusMessage = document.getElementById('statusMessage');
+const processingOverlay = document.getElementById('processingOverlay');
+const stepHash = document.getElementById('stepHash');
+const stepMetaMask = document.getElementById('stepMetaMask');
+const stepBlockchain = document.getElementById('stepBlockchain');
+
+function updateSubmitButton() {
+  const isValid = certIdInput.value.trim() && fileInput.files.length && studentWalletInput.value.trim();
+  submitBtn.disabled = !isValid;
+}
+
+certIdInput.addEventListener('input', updateSubmitButton);
+studentWalletInput.addEventListener('input', updateSubmitButton);
+fileUploadArea.addEventListener('click', () => fileInput.click());
+
+fileInput.addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (file) {
+    document.querySelector('.file-name').textContent = file.name;
+    document.querySelector('.file-size').textContent = (file.size / 1024).toFixed(2) + ' KB';
+    filePreview.style.display = 'flex';
+    fileUploadArea.classList.add('dragover');
+    updateSubmitButton();
+  } else {
+    filePreview.style.display = 'none';
+    fileUploadArea.classList.remove('dragover');
+  }
+});
+
+fileUploadArea.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  fileUploadArea.classList.add('dragover');
+});
+
+fileUploadArea.addEventListener('dragleave', () => fileUploadArea.classList.remove('dragover'));
+
+fileUploadArea.addEventListener('drop', (e) => {
+  e.preventDefault();
+  fileUploadArea.classList.add('dragover');
+  fileInput.files = e.dataTransfer.files;
+  fileInput.dispatchEvent(new Event('change'));
+});
+
+function removeFile() {
+  fileInput.value = '';
+  filePreview.style.display = 'none';
+  fileUploadArea.classList.remove('dragover');
+  updateSubmitButton();
+}
+
+function showMessage(type, message, txHash = null) {
+  statusMessage.innerHTML = '';
+  const messageDiv = document.createElement('div');
+  messageDiv.className = `toast ${type}`;
+  messageDiv.style.position = 'relative';
+  messageDiv.style.paddingRight = '2.5rem';
+
+  messageDiv.innerHTML = `
+    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} toast-icon"></i>
+    <div class="toast-content">
+      ${message}
+      ${txHash ? `
+        <div class="tx-info" style="margin-top:0.5rem;">
+          <span style="font-family: monospace; word-break: break-all;">${txHash.trim()}</span>
+        </div>
+      ` : ''}
+    </div>
+    <button class="toast-close" onclick="this.parentElement.remove()" style="position:absolute; top:0.25rem; right:0.25rem; border:none; background:transparent; color:red; cursor:pointer;">
+      <i class="fas fa-times"></i>
+    </button>
+  `;
+
+  statusMessage.appendChild(messageDiv);
+  if (type === 'error') setTimeout(() => messageDiv.remove(), 6000);
+}
+
+// Contract Integration
+const contractAddress = "{{ CONTRACT_ADDRESS }}";
+const contractAbi = JSON.parse('{{ ABI | safe }}');
+let web3, contract, userAccount;
+
+async function initWeb3() {
+  if (!window.ethereum) {
+    showMessage('error', 'MetaMask is required to interact with the blockchain.');
+    return false;
+  }
+
+  try {
+    web3 = new Web3(window.ethereum);
+    const rawChainId = await web3.eth.getChainId();
+    const chainId = typeof rawChainId === 'string' ? parseInt(rawChainId, 16) : Number(rawChainId);
+
+    // Allow Local Hardhat (31337) and Sepolia (11155111)
+    const allowedChains = [31337, 11155111];
+    if (!allowedChains.includes(chainId)) {
+      showMessage('error', 'Please switch your wallet to Hardhat Local (Chain ID 31337).');
+      return false;
+    }
+
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    userAccount = accounts[0];
+    contract = new web3.eth.Contract(contractAbi, contractAddress);
+    return true;
+  } catch (err) {
+    showMessage('error', `Wallet connection failed: ${err.message}`);
+    return false;
+  }
+}
+
+initWeb3().then((success) => {
+  if (success && !studentWalletInput.value) {
+    studentWalletInput.value = userAccount;
+    updateSubmitButton();
+  }
+});
+
+function computeFileHash(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const wordArray = CryptoJS.lib.WordArray.create(e.target.result);
+      resolve('0x' + CryptoJS.SHA256(wordArray).toString());
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+// Single Mint Handler
+document.getElementById('issueForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const certId = certIdInput.value.trim();
+  const recipient = studentWalletInput.value.trim();
+  const note = document.getElementById('txid_note').value.trim() || `ipfs://animus/${certId}`;
+  const file = fileInput.files[0];
+
+  if (!web3 || !contract || !userAccount) {
+    const initialized = await initWeb3();
+    if (!initialized) {
+      alert("Failed to connect to MetaMask/Web3.");
+      return;
+    }
+  }
+
+  processingOverlay.style.display = 'flex';
+  stepHash.classList.add('active');
+
+  try {
+    const digest = await computeFileHash(file);
+    console.log("Computed SHA-256 Digest:", digest);
+
+    stepHash.classList.remove('active');
+    stepMetaMask.classList.add('active');
+
+    // Estimate gas first to capture the exact revert string
+    let gasEstimate;
+    try {
+      gasEstimate = await contract.methods.mintCert(recipient, certId, digest, note)
+        .estimateGas({ from: userAccount });
+      console.log("Estimated Gas:", gasEstimate);
+    } catch (gasErr) {
+      console.error("Gas estimation failed (Contract Revert):", gasErr);
+      throw new Error("Contract call rejected: " + (gasErr.data?.message || gasErr.message));
+    }
+
+    // Trigger the transaction in MetaMask
+    const tx = await contract.methods.mintCert(recipient, certId, digest, note)
+      .send({
+        from: userAccount,
+        gas: Math.floor(gasEstimate * 1.2)
+      });
+
+    console.log("Transaction mined:", tx);
+
+    stepMetaMask.classList.remove('active');
+    stepBlockchain.classList.add('active');
+
+    await fetch('/save_tx', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cert_id: certId, tx_hash: tx.transactionHash })
+    });
+
+    processingOverlay.style.display = 'none';
+    showMessage('success', `Certificate #${certId} successfully minted!`, tx.transactionHash);
+  } catch (err) {
+    console.error("Issuance failed entirely:", err);
+    processingOverlay.style.display = 'none';
+    alert("Minting Error: " + err.message);
+    showMessage('error', `Mint failed: ${err.message}`);
+  } finally {
+    stepHash.classList.remove('active');
+    stepMetaMask.classList.remove('active');
+    stepBlockchain.classList.remove('active');
+  }
+});
+
+// Automated Batch Mint Handler
+async function processBatch() {
+  const fileInputBatch = document.getElementById('csvFile');
+  const statusDiv = document.getElementById('batchStatus');
+  const batchBtn = document.getElementById('batchBtn');
+
+  if (!fileInputBatch.files.length) {
+    alert('Please upload a roster CSV file first.');
+    return;
+  }
+
+  if (!web3 || !contract || !userAccount) {
+    const initialized = await initWeb3();
+    if (!initialized) return;
+  }
+
+  batchBtn.disabled = true;
+  statusDiv.innerHTML = '<div class="alert alert-info">Parsing roster and hashing credentials on backend...</div>';
+
+  const formData = new FormData();
+  formData.append('csv_file', fileInputBatch.files[0]);
+
+  try {
+    const res = await fetch('/batch_issue_csv', { method: 'POST', body: formData });
+    const data = await res.json();
+
+    if (!res.ok || data.error) {
+      throw new Error(data.error || 'Server error while parsing roster CSV.');
+    }
+
+    statusDiv.innerHTML = `<div class="alert alert-warning">Please sign transaction in MetaMask to batch mint <strong>${data.count}</strong> certificates...</div>`;
+
+    // Calls batchMintCert on-chain in a single transaction
+    const tx = await contract.methods.batchMintCert(
+      data.wallets,
+      data.ids,
+      data.digests,
+      data.uris
+    ).send({ from: userAccount });
+
+    statusDiv.innerHTML = `
+      <div class="alert alert-success">
+        <strong>Batch Mint Complete!</strong> Issued ${data.count} certificates in 1 block.<br>
+        TX: <code>${tx.transactionHash}</code>
+      </div>
+    `;
+
+    for (const id of data.ids) {
+      await fetch('/save_tx', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cert_id: id, tx_hash: tx.transactionHash })
+      });
+    }
+
+  } catch (err) {
+    statusDiv.innerHTML = `<div class="alert alert-danger">Batch issuance failed: ${err.message}</div>`;
+  } finally {
+    batchBtn.disabled = false;
+  }
+}
+</script>
+{% endblock %}`

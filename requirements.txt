@@ -1,0 +1,8 @@
+Flask
+web3
+python-dotenv
+py-solc-x
+eth-account
+requests
+pathlib
+werkzeug

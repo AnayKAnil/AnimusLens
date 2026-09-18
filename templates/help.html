@@ -1,0 +1,1309 @@
+{% extends "layout.html" %}
+{% block title %}Help & Support - SECURE-CERT{% endblock %}
+{% block content %}
+
+<style>
+/* --- Hero Section Specific Dark Mode Override --- */
+/* This rule specifically targets the help-hero section in dark mode */
+[data-theme="dark"] .help-hero {
+    background: var(--dark-color); /* Use the main dark background color */
+    /* Or use a specific black: background: #000000; */
+    /* Or use a very dark gradient: background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%); */
+}
+
+/* --- 3D Animated Boxes Styles (from index.html) --- */
+.animation-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0; /* Behind content */
+  pointer-events: none; /* Prevent blocking clicks on content */
+  /* Optional: Add a subtle fade effect if needed */
+  /* opacity: 0.3; */
+}
+
+.icontainer {
+  position: absolute;
+  top: 50%; /* Center vertically */
+  left: 50%; /* Center horizontally */
+  transform: translate(-50%, -50%); /* Correctly center the container */
+  /* Adjust perspective for better 3D effect relative to container size */
+  perspective: 1000px; /* Start with a moderate perspective */
+  transform-style: preserve-3d; /* Important for 3D children */
+  width: 20em; /* Adjust base size, use em for relative scaling */
+  height: 20em; /* Adjust base size */
+  /* Optional: Add a subtle animation to the container itself */
+  /* animation: rotateContainer 30s linear infinite; */
+}
+
+/* Optional: Rotate the whole container slowly */
+/*
+@keyframes rotateContainer {
+  from { transform: translate(-50%, -50%) rotateY(0deg) rotateX(10deg); }
+  to { transform: translate(-50%, -50%) rotateY(360deg) rotateX(10deg); }
+}
+*/
+
+.holder {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) translate3d(0em, 3em, 1.5em); /* Initial offset */
+  transform-style: preserve-3d;
+  width: 100%;
+  height: 100%;
+}
+
+.holder:nth-child(2) {
+  transform: translate(-50%, -50%) rotateY(-90deg) rotateX(90deg) translate3d(0, 3em, 1.5em); /* Side face */
+}
+.holder:nth-child(3) {
+  transform: translate(-50%, -50%) rotateZ(-90deg) rotateX(-90deg) translate3d(0, 3em, 1.5em); /* Top face */
+}
+
+/* Box styling */
+.box {
+  position: absolute;
+  top: 0; /* Start from top-left of holder */
+  left: 0;
+  transform-style: preserve-3d;
+  animation: ani-box 6s infinite ease-in-out; /* Smooth easing */
+  width: 3em;
+  height: 3em;
+  /* Optional: Add a slight glow or border */
+  /* box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); */
+}
+
+.box:before,
+.box:after {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  content: "";
+  /* Use CSS variables for colors if desired, or keep fixed */
+  /* background-color: var(--primary-color); */
+  /* background-color: var(--secondary-color); */
+  /* background-color: var(--success-color); */
+}
+
+/* Example fixed colors for each face using global CSS variables */
+.holder:nth-child(1) .box { background-color: rgba(99, 102, 241, 0.5); } /* --primary-color */
+.holder:nth-child(1) .box:before { background-color: rgba(79, 70, 229, 0.5); } /* --primary-dark */
+.holder:nth-child(1) .box:after { background-color: rgba(139, 92, 246, 0.5); } /* --primary-light */
+
+.holder:nth-child(2) .box { background-color: rgba(100, 255, 218, 0.5); } /* --secondary-color */
+.holder:nth-child(2) .box:before { background-color: rgba(94, 234, 212, 0.5); } /* --secondary-color alt */
+.holder:nth-child(2) .box:after { background-color: rgba(176, 222, 159, 0.5); } /* Feature 2 Alt */
+
+.holder:nth-child(3) .box { background-color: rgba(239, 68, 68, 0.5); } /* --error-color */
+.holder:nth-child(3) .box:before { background-color: rgba(220, 38, 38, 0.5); } /* --error-color alt */
+.holder:nth-child(3) .box:after { background-color: rgba(240, 139, 172, 0.5); } /* Feature 3 Alt */
+
+
+.box:before {
+  left: 100%;
+  bottom: 0;
+  transform: rotateY(90deg);
+  transform-origin: 0 50%;
+}
+.box:after {
+  left: 0;
+  bottom: 100%;
+  transform: rotateX(90deg);
+  transform-origin: 0 100%;
+}
+
+/* Animation keyframes for individual boxes */
+@keyframes ani-box {
+  0%, 100% { transform: translate3d(0, 0, 0) scale3d(1, 1, 1); }
+  16.66% { transform: translate3d(-3em, 0, 0) scale3d(0.85, 0.85, 1.1); }
+  33.33% { transform: translate3d(-3em, -3em, 0) scale3d(1.1, 0.85, 0.85); }
+  50% { transform: translate3d(0, -3em, 0) scale3d(0.85, 1.1, 0.85); }
+  66.66% { transform: translate3d(0, -3em, -3em) scale3d(0.85, 0.85, 1.1); }
+  83.33% { transform: translate3d(0, 0, -3em) scale3d(1.1, 0.85, 0.85); }
+}
+
+/* --- Responsive Adjustments for Boxes --- */
+
+/* Tablet and smaller desktop */
+@media (max-width: 992px) {
+  .icontainer {
+    width: 15em; /* Smaller container */
+    height: 15em;
+    perspective: 800px; /* Adjust perspective */
+  }
+  /* Optionally, slow down animation on medium screens */
+  .box {
+    animation-duration: 7s; /* Slightly slower */
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .animation-bg {
+    /* Consider hiding the complex 3D animation on mobile */
+    display: none; /* Un-comment this line to hide on mobile */
+  }
+  /* If you want to keep it, make it much smaller */
+  /*
+  .icontainer {
+    width: 10em;
+    height: 10em;
+    perspective: 500px;
+  }
+  .box {
+    width: 2em;
+    height: 2em;
+    animation-duration: 8s;
+  }
+  */
+}
+
+@media (max-width: 576px) {
+  /* Keep the animation-bg hidden or very small */
+  /*
+  .icontainer {
+    width: 8em;
+    height: 8em;
+    perspective: 400px;
+  }
+  */
+}
+
+/* --- Original Help Page Hero Styles (Adjusted) --- */
+.help-hero {
+  position: relative; /* Changed from absolute context */
+  background: var(--gradient-hero); /* Use global variable initially */
+  padding: 4rem 0;
+  overflow: hidden;
+  /* Remove overflow: hidden if you want animation to bleed slightly */
+  /* Ensure text is readable over animation */
+  color: var(--text-primary); /* Use theme text color */
+  /* Ensure the ::before overlay works */
+  position: relative;
+  z-index: 0;
+}
+
+.help-hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+  opacity: 0.2; /* Reduce opacity for subtle effect */
+  z-index: 0; /* Behind animation */
+}
+
+.help-content {
+  position: relative;
+  z-index: 2; /* Above animation and background */
+  text-align: center; /* Center content */
+  /* Ensure content is readable over animation */
+  background: rgba(0, 0, 0, 0.3); /* Subtle overlay */
+  padding: 1rem;
+  border-radius: var(--border-radius-md);
+  margin: 0 1rem; /* Add side margins */
+  display: inline-block;
+  max-width: 800px; /* Limit max width */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.help-title {
+  font-size: clamp(1.5rem, 5vw, 2.5rem); /* Adjusted size */
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+  color: var(--text-primary); /* Ensure text color */
+}
+
+.help-subtitle {
+  font-size: 1rem; /* Adjusted size */
+  margin-bottom: 1.5rem;
+  color: var(--text-secondary); /* Ensure text color */
+  max-width: 600px; /* Match content area */
+}
+
+/* Search Box */
+.search-box {
+  max-width: 500px;
+  margin: 0 auto 1rem; /* Center and add bottom margin */
+  position: relative;
+  z-index: 3; /* Above animation */
+}
+
+.search-box input {
+  width: 100%;
+  padding: 1rem 3.5rem 1rem 1.5rem;
+  border: none;
+  border-radius: var(--border-radius-lg);
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-lg);
+  transition: var(--transition-fast);
+  color: var(--text-primary); /* Ensure text color */
+}
+
+[data-theme="dark"] .search-box input {
+  background: rgba(55, 65, 81, 0.95); /* Adjust for dark mode */
+  color: var(--text-primary);
+}
+
+.search-box input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+}
+
+.search-box i {
+  position: absolute;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--primary-color);
+  font-size: 1.1rem;
+}
+
+/* Animation Wrapper */
+.animation-wrapper {
+  position: relative;   /* Contain the animation */
+  height: 250px;        /* Adjust based on your animation size */
+  margin-bottom: 0.5rem;  /* spacing below the animation */
+  z-index: 1; /* Below content but above background */
+}
+
+/* --- Original Help Page Card Styles (Adjusted) --- */
+.help-section,
+.faq-section,
+.tutorial-section {
+    padding: 4rem 0;
+    background: var(--light-color); /* Use theme background */
+}
+[data-theme="dark"] .help-section,
+[data-theme="dark"] .faq-section,
+[data-theme="dark"] .tutorial-section {
+    background: var(--dark-color); /* Use theme background */
+}
+
+.help-card {
+  background: var(--gradient-card);
+  border-radius: var(--border-radius-lg);
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: var(--transition-normal);
+  height: 100%;
+  position: relative; /* Ensure relative positioning for pseudo-element */
+}
+
+.help-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-color);
+}
+
+.help-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+    transform: scaleX(0);
+    transition: var(--transition-normal);
+}
+
+.help-card:hover::before {
+    transform: scaleX(1);
+}
+
+@supports not (backdrop-filter: blur(10px)) {
+  .help-card {
+    background: var(--light-color);
+  }
+}
+
+.help-card-icon {
+  width: 60px;
+  height: 60px;
+  background: var(--gradient-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.help-card h4 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+}
+
+.help-card p {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.help-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: var(--transition-fast);
+}
+
+.help-link:hover {
+  color: var(--primary-dark);
+  transform: translateX(3px);
+}
+
+.faq-section {
+  background: var(--background-light);
+  padding: 4rem 0;
+}
+
+.faq-item {
+  background: var(--gradient-card);
+  border-radius: var(--border-radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 1rem;
+  overflow: hidden;
+  transition: var(--transition-fast);
+  position: relative; /* Ensure relative positioning for pseudo-element */
+}
+
+.faq-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+    transform: scaleX(0);
+    transition: var(--transition-normal);
+}
+
+.faq-item:hover {
+  border-color: var(--primary-color);
+}
+
+.faq-item:hover::before {
+    transform: scaleX(1);
+}
+
+.faq-question {
+  padding: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  transition: var(--transition-fast);
+  position: relative;
+  z-index: 1; /* Ensure it's above pseudo-element */
+}
+
+.faq-question:hover {
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.faq-question i {
+  color: var(--primary-color);
+  transition: var(--transition-fast);
+}
+
+.faq-question.active i {
+  transform: rotate(180deg);
+}
+
+.faq-answer {
+  padding: 0 1.5rem;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+  position: relative;
+  z-index: 1; /* Ensure it's above pseudo-element */
+}
+
+.faq-answer.active {
+  padding: 0 1.5rem 1.5rem;
+  max-height: 200px;
+}
+
+.faq-answer p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Light Mode (default) */
+.contact-section {
+    padding: 4rem 0;
+    background: var(--gradient-primary);
+    color: white;
+}
+
+/* Contact Card styling remains the same for light mode */
+.contact-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
+    transition: var(--transition-normal);
+}
+
+.contact-card:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-3px);
+}
+
+.contact-icon {
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.25rem;
+}
+
+.contact-card h5 {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: white;
+}
+
+.contact-card p {
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 1rem;
+}
+
+.contact-link {
+    color: var(--secondary-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition-fast);
+}
+
+.contact-link:hover {
+    color: white;
+    text-decoration: underline;
+}
+
+/* ------------------------------
+   Dark Mode using data-theme
+--------------------------------*/
+[data-theme="dark"] .contact-section {
+    background: var(--dark-color); /* main dark background or gradient */
+    color: #eee;
+}
+
+[data-theme="dark"] .contact-card {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .contact-card:hover {
+    background: rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .contact-icon {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .contact-card h5 {
+    color: #fff;
+}
+
+[data-theme="dark"] .contact-card p {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+[data-theme="dark"] .contact-link {
+    color: #66b2ff;
+}
+
+[data-theme="dark"] .contact-link:hover {
+    color: #fff;
+}
+
+
+.tutorial-card {
+  background: var(--gradient-card);
+  border-radius: var(--border-radius-lg);
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 2rem;
+  transition: var(--transition-normal);
+  position: relative; /* Ensure relative positioning for pseudo-element */
+}
+
+.tutorial-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+    transform: scaleX(0);
+    transition: var(--transition-normal);
+}
+
+.tutorial-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-color);
+}
+
+.tutorial-card:hover::before {
+    transform: scaleX(1);
+}
+
+.tutorial-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.tutorial-number {
+  width: 40px;
+  height: 40px;
+  background: var(--gradient-primary);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  margin-right: 1rem;
+}
+
+.tutorial-header h4 {
+  color: var(--text-primary);
+  margin: 0;
+  font-weight: 700;
+}
+
+.tutorial-steps {
+  list-style: none;
+  padding: 0;
+}
+
+.tutorial-steps li {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: flex-start;
+}
+
+[data-theme="dark"] .tutorial-steps li {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.tutorial-steps li:last-child {
+  border-bottom: none;
+}
+
+.tutorial-steps li i {
+  color: var(--success-color);
+  margin-right: 0.75rem;
+  margin-top: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--border-radius-sm);
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.status-online {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success-color);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.status-maintenance {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning-color);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.breadcrumb-custom {
+  background: rgba(99, 102, 241, 0.1);
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.breadcrumb-custom .breadcrumb {
+  background: transparent;
+  margin: 0;
+}
+
+.breadcrumb-custom .breadcrumb-item a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.breadcrumb-custom .breadcrumb-item.active {
+  color: var(--text-secondary);
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+  .help-hero {
+    padding: 2rem 0;
+  }
+
+  .help-title {
+    font-size: clamp(1.2rem, 4vw, 2rem);
+  }
+
+  .help-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .search-box {
+    margin: 0 1rem 1rem; /* Adjust margin */
+  }
+
+  .search-result-item.selected {
+  background: rgba(99, 102, 241, 0.2);
+  border-left: 3px solid var(--primary-color);
+}
+
+
+  .animation-wrapper {
+    height: 200px;
+    margin-bottom: 1rem; /* Adjust margin */
+  }
+
+  .help-card {
+    margin-bottom: 1.5rem;
+  }
+
+  .tutorial-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tutorial-number {
+    margin-bottom: 0.75rem;
+    margin-right: 0;
+  }
+}
+
+/* Search functionality styles */
+.search-results {
+  background: var(--gradient-card);
+  border-radius: var(--border-radius-md);
+  padding: 1rem;
+  margin-top: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: none;
+  position: relative; /* Ensure it appears above other elements */
+  z-index: 1000;
+}
+
+.search-result-item {
+  padding: 0.75rem;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.search-result-item:hover {
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.search-result-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.search-result-desc {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+</style>
+
+<!-- Breadcrumb -->
+<div class="breadcrumb-custom">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Help & Support</li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<section class="help-hero">
+  <!-- Animated Boxes Background -->
+  <div class="animation-bg">
+    <div class="icontainer">
+      <div class="holder"><div class="box"></div></div>
+      <div class="holder"><div class="box"></div></div>
+      <div class="holder"><div class="box"></div></div>
+    </div>
+      <!-- Floating Animus Logo -->
+  <div class="floating-logo">
+    <img src="{{ url_for('static', filename='animus-logo.png') }}" alt="ANIMUS Logo">
+  </div>
+  </div>
+
+  <div class="container text-center">
+    <!-- Hero Content (Z-index higher than animation-bg) -->
+    <div class="help-content">
+      <h1 class="help-title" data-aos="fade-up">Help & Support</h1>
+      <p class="help-subtitle mx-auto" data-aos="fade-up" data-aos-delay="100">
+        Get assistance with SECURE-CERT blockchain certificate verification system. 
+        Find answers, tutorials, and support resources.
+      </p>
+
+      <!-- Search Box -->
+      <div class="search-box" data-aos="fade-up" data-aos-delay="200">
+        <input type="text" id="helpSearch" placeholder="Search help topics, FAQs, tutorials..." aria-label="Search help topics">
+        <i class="fas fa-search"></i>
+
+        <!-- Search Results -->
+        <div class="search-results" id="searchResults">
+          <!-- Results will be populated by JavaScript -->
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- Quick Help Cards -->
+<section class="help-section">
+  <div class="container">
+    <div class="row">
+      <div class="col-12 text-center mb-5" data-aos="fade-up">
+        <h2 class="section-title">Quick Help</h2>
+        <p class="section-subtitle">Get started with common tasks</p>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+        <div class="help-card">
+          <div class="help-card-icon">
+            <i class="fas fa-plus-circle"></i>
+          </div>
+          <h4>Issue Certificate</h4>
+          <p>Learn how to create and store certificate hashes on the blockchain for permanent verification.</p>
+          <a href="#tutorial-issue" class="help-link">
+            View Tutorial <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+        <div class="help-card">
+          <div class="help-card-icon">
+            <i class="fas fa-search"></i>
+          </div>
+          <h4>Verify Certificate</h4>
+          <p>Step-by-step guide to authenticate certificates using blockchain verification technology.</p>
+          <a href="#tutorial-verify" class="help-link">
+            View Tutorial <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+        <div class="help-card">
+          <div class="help-card-icon">
+            <i class="fas fa-question-circle"></i>
+          </div>
+          <h4>Troubleshooting</h4>
+          <p>Common issues and solutions for blockchain connectivity, MetaMask setup, and verification errors.</p>
+          <a href="#faq" class="help-link">
+            View FAQ <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
+        <div class="help-card">
+          <div class="help-card-icon">
+            <i class="fas fa-wallet"></i>
+          </div>
+          <h4>MetaMask Setup</h4>
+          <p>Configure MetaMask wallet for Sepolia testnet to interact with the blockchain system.</p>
+          <a href="#metamask-setup" class="help-link">
+            Setup Guide <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="500">
+        <div class="help-card">
+          <div class="help-card-icon">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <h4>Security Guide</h4>
+          <p>Best practices for secure certificate management and blockchain interaction safety.</p>
+          <a href="#security" class="help-link">
+            Learn More <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="600">
+        <div class="help-card">
+          <div class="help-card-icon">
+            <i class="fas fa-cube"></i>
+          </div>
+          <h4>Contract Information</h4>
+          <p>View smart contract details, network status, and Etherscan links for transparency.</p>
+          <a href="/contract_info" class="help-link" target="_blank">
+            View Contract <i class="fas fa-external-link-alt"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="700">
+        <div class="help-card">
+          <div class="help-card-icon">
+            <i class="fas fa-headset"></i>
+          </div>
+          <h4>Contact Support</h4>
+          <p>Need personalized help? Reach out to our technical support team for assistance.</p>
+          <a href="#contact" class="help-link">
+            Get Support <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Tutorials Section -->
+<section class="tutorial-section" id="tutorials">
+  <div class="container">
+    <div class="row">
+      <div class="col-12 text-center mb-5" data-aos="fade-up">
+        <h2 class="section-title">Step-by-Step Tutorials</h2>
+        <p class="section-subtitle">Detailed guides for all platform features</p>
+      </div>
+    </div>
+
+    <!-- Issue Certificate Tutorial -->
+    <div class="tutorial-card" id="tutorial-issue" data-aos="fade-up">
+      <div class="tutorial-header">
+        <div class="tutorial-number">1</div>
+        <h4>How to Issue a Certificate</h4>
+      </div>
+      <ol class="tutorial-steps">
+        <li><i class="fas fa-check-circle"></i>Navigate to the "Issue Certificate" page from the main menu</li>
+        <li><i class="fas fa-check-circle"></i>Enter a unique Certificate ID (e.g., "SECURE-2025-001")</li>
+        <li><i class="fas fa-check-circle"></i>Upload your certificate file (PDF, JPG, PNG supported)</li>
+        <li><i class="fas fa-check-circle"></i>Connect your MetaMask wallet when prompted</li>
+        <li><i class="fas fa-check-circle"></i>Review the transaction details and confirm</li>
+        <li><i class="fas fa-check-circle"></i>Wait for blockchain confirmation (usually 30-60 seconds)</li>
+        <li><i class="fas fa-check-circle"></i>Save the transaction hash for future reference</li>
+      </ol>
+    </div>
+
+    <!-- Verify Certificate Tutorial -->
+    <div class="tutorial-card" id="tutorial-verify" data-aos="fade-up" data-aos-delay="100">
+      <div class="tutorial-header">
+        <div class="tutorial-number">2</div>
+        <h4>How to Verify a Certificate</h4>
+      </div>
+      <ol class="tutorial-steps">
+        <li><i class="fas fa-check-circle"></i>Go to the "Verify Certificate" page</li>
+        <li><i class="fas fa-check-circle"></i>Enter the Certificate ID you want to verify</li>
+        <li><i class="fas fa-check-circle"></i>Upload the certificate file to check</li>
+        <li><i class="fas fa-check-circle"></i>Click "Verify Certificate" to start the process</li>
+        <li><i class="fas fa-check-circle"></i>System computes SHA-256 hash of uploaded file</li>
+        <li><i class="fas fa-check-circle"></i>Hash is compared with blockchain record</li>
+        <li><i class="fas fa-check-circle"></i>View verification result with timestamp and transaction details</li>
+      </ol>
+    </div>
+
+    <!-- MetaMask Setup Tutorial -->
+    <div class="tutorial-card" id="metamask-setup" data-aos="fade-up" data-aos-delay="200">
+      <div class="tutorial-header">
+        <div class="tutorial-number">3</div>
+        <h4>MetaMask Setup for Sepolia</h4>
+      </div>
+      <ol class="tutorial-steps">
+        <li><i class="fas fa-check-circle"></i>Install MetaMask browser extension from metamask.io</li>
+        <li><i class="fas fa-check-circle"></i>Create a new wallet or import existing one</li>
+        <li><i class="fas fa-check-circle"></i>Add Sepolia testnet: Network Name: Sepolia, RPC URL: https://sepolia.infura.io/v3/</li>
+        <li><i class="fas fa-check-circle"></i>Get test ETH from Sepolia faucet for transaction fees</li>
+        <li><i class="fas fa-check-circle"></i>Ensure you're connected to Sepolia network before issuing certificates</li>
+        <li><i class="fas fa-check-circle"></i>Keep your seed phrase secure and never share it</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="faq-section" id="faq">
+  <div class="container">
+    <div class="row">
+      <div class="col-12 text-center mb-5" data-aos="fade-up">
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        <p class="section-subtitle">Common questions and answers</p>
+      </div>
+    </div>
+
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="faq-item" data-aos="fade-up">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            What is blockchain certificate verification?
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="faq-answer">
+            <p>Blockchain certificate verification stores a unique hash of your certificate on the Ethereum blockchain. This creates an immutable, tamper-proof record that can be used to verify the authenticity of certificates without revealing the actual content.</p>
+          </div>
+        </div>
+
+        <div class="faq-item" data-aos="fade-up" data-aos-delay="100">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            Why do I need MetaMask?
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="faq-answer">
+            <p>MetaMask serves as your digital wallet for blockchain interactions, enabling secure transaction signing and payment of gas fees. It's only required when issuing certificates because this process writes data to the Ethereum blockchain, which costs a small transaction fee. Certificate verification is completely free and doesn't need MetaMask - our system reads the existing blockchain public data directly through Web3.py to compare document hashes, making verification accessible to anyone without requiring a crypto wallet or any fees.</p>
+          </div>
+        </div>
+
+        <div class="faq-item" data-aos="fade-up" data-aos-delay="200">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            Are there any costs involved?
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="faq-answer">
+            <p>Since we use Sepolia testnet, transactions require test ETH which is free to obtain from faucets. In a mainnet deployment, you would pay standard Ethereum gas fees for certificate issuance.</p>
+          </div>
+        </div>
+
+        <div class="faq-item" data-aos="fade-up" data-aos-delay="300">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            What file formats are supported?
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="faq-answer">
+            <p>We support PDF, JPG, JPEG, PNG, and most common image formats. The system computes a SHA-256 hash of the file content, so the format doesn't affect verification security.</p>
+          </div>
+        </div>
+
+        <div class="faq-item" data-aos="fade-up" data-aos-delay="400">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            How long does verification take?
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="faq-answer">
+            <p>Certificate verification is instant as it only requires reading from the blockchain. Certificate issuance takes 30-60 seconds depending on network congestion and gas price.</p>
+          </div>
+        </div>
+
+        <div class="faq-item" data-aos="fade-up" data-aos-delay="500">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            Can certificates be revoked or modified?
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="faq-answer">
+            <p>Our smart contract includes revocation functionality. Certificates can be revoked by authorized parties, but the original blockchain record remains immutable for audit purposes.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contact Support Section -->
+<section class="contact-section" id="contact">
+  <div class="container">
+    <div class="row">
+      <div class="col-12 text-center mb-5" data-aos="fade-up">
+        <h2 class="section-title text-white">Contact Support</h2>
+        <p class="section-subtitle text-white opacity-75">Need additional help? Our team is here to assist you</p>
+
+        <div class="status-badge status-online mx-auto">
+          <i class="fas fa-circle me-2" style="font-size: 0.6rem;"></i>
+          Support Team Online
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+        <div class="contact-card">
+          <div class="contact-icon">
+            <i class="fas fa-envelope"></i>
+          </div>
+          <h5>Email Support</h5>
+          <p>Get detailed technical assistance</p>
+          <a href="mailto:princelv84@gmail.com" class="contact-link">
+            princelv84@gmail.com
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+        <div class="contact-card">
+          <div class="contact-icon">
+            <i class="fab fa-github"></i>
+          </div>
+          <h5>GitHub Issues</h5>
+          <p>Report bugs and feature requests</p>
+          <a href="https://github.com/lovnishverma" class="contact-link" target="_blank">
+            View Repository
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+        <div class="contact-card">
+          <div class="contact-icon">
+            <i class="fas fa-phone"></i>
+          </div>
+          <h5>Phone Support</h5>
+          <p>Speak with our technical team</p>
+          <a href="tel:+91-8894-869371" class="contact-link">
+            +91-8894-869371
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// FAQ Toggle Functionality
+function toggleFaq(button) {
+  const answer = button.nextElementSibling;
+  const isActive = button.classList.contains('active');
+
+  // Close all FAQ items
+  document.querySelectorAll('.faq-question').forEach(q => {
+    q.classList.remove('active');
+    q.nextElementSibling.classList.remove('active');
+  });
+
+  // Open clicked item if it wasn't active
+  if (!isActive) {
+    button.classList.add('active');
+    answer.classList.add('active');
+  }
+}
+
+// Search functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('helpSearch');
+  const searchResults = document.getElementById('searchResults');
+
+  const searchData = [
+    { title: 'How to Issue Certificate', desc: 'Step-by-step guide for certificate issuance', target: '#tutorial-issue' },
+    { title: 'How to Verify Certificate', desc: 'Learn certificate verification process', target: '#tutorial-verify' },
+    { title: 'MetaMask Setup', desc: 'Configure MetaMask for Sepolia testnet', target: '#metamask-setup' },
+    { title: 'FAQ', desc: 'Frequently asked questions', target: '#faq' },
+    { title: 'Contact Support', desc: 'Get help from our support team', target: '#contact' },
+    { title: 'Blockchain Verification', desc: 'Understanding blockchain certificate verification', target: '#faq' },
+    { title: 'File Formats', desc: 'Supported file formats for certificates', target: '#faq' },
+    { title: 'Troubleshooting', desc: 'Common issues and solutions', target: '#faq' }
+  ];
+
+  searchInput.addEventListener('input', function() {
+    const query = this.value.toLowerCase().trim();
+
+    if (query.length < 2) {
+      searchResults.style.display = 'none';
+      return;
+    }
+
+    const matches = searchData.filter(item =>
+      item.title.toLowerCase().includes(query) ||
+      item.desc.toLowerCase().includes(query)
+    );
+
+    if (matches.length > 0) {
+      searchResults.innerHTML = matches.map(item => `
+        <div class="search-result-item" onclick="navigateToSection('${item.target}')">
+          <div class="search-result-title">${item.title}</div>
+          <div class="search-result-desc">${item.desc}</div>
+        </div>
+      `).join('');
+      searchResults.style.display = 'block';
+    } else {
+      searchResults.innerHTML = '<div class="search-result-item"><div class="search-result-title">No results found</div><div class="search-result-desc">Try different keywords</div></div>';
+      searchResults.style.display = 'block';
+    }
+  });
+
+  // Hide search results when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+      searchResults.style.display = 'none';
+    }
+  });
+});
+
+// Navigate to section
+function navigateToSection(target) {
+  document.getElementById('searchResults').style.display = 'none';
+  document.getElementById('helpSearch').value = '';
+
+  const element = document.querySelector(target);
+  if (element) {
+    element.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+
+    // Add highlight effect
+    element.style.transition = 'all 0.3s ease';
+    element.style.transform = 'scale(1.02)';
+    element.style.boxShadow = '0 10px 30px rgba(99, 102, 241, 0.3)';
+
+    setTimeout(() => {
+      element.style.transform = 'scale(1)';
+      element.style.boxShadow = '';
+    }, 1000);
+  }
+}
+
+// Smooth scrolling for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function (e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  });
+});
+
+// Auto-expand first FAQ on load
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(() => {
+    const firstFaq = document.querySelector('.faq-question');
+    if (firstFaq) {
+      toggleFaq(firstFaq);
+    }
+  }, 1000);
+});
+
+// Enhanced search with keyboard navigation
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('helpSearch');
+  let selectedIndex = -1;
+
+  searchInput.addEventListener('keydown', function(e) {
+    const results = document.querySelectorAll('.search-result-item');
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      selectedIndex = Math.min(selectedIndex + 1, results.length - 1);
+      updateSelection(results);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      selectedIndex = Math.max(selectedIndex - 1, -1);
+      updateSelection(results);
+    } else if (e.key === 'Enter' && selectedIndex >= 0) {
+      e.preventDefault();
+      results[selectedIndex].click();
+    } else if (e.key === 'Escape') {
+      document.getElementById('searchResults').style.display = 'none';
+      selectedIndex = -1;
+    }
+  });
+
+  function updateSelection(results) {
+    results.forEach((result, index) => {
+      if (index === selectedIndex) {
+        result.style.background = 'rgba(99, 102, 241, 0.2)';
+      } else {
+        result.style.background = '';
+      }
+    });
+  }
+});
+
+// System status check
+async function checkSystemStatus() {
+  try {
+    const response = await fetch('/contract_info');
+    const statusBadge = document.querySelector('.status-badge');
+
+    if (response.ok) {
+      statusBadge.className = 'status-badge status-online';
+      statusBadge.innerHTML = '<i class="fas fa-circle me-2" style="font-size: 0.6rem;"></i>All Systems Operational';
+    } else {
+      statusBadge.className = 'status-badge status-maintenance';
+      statusBadge.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>System Maintenance';
+    }
+  } catch (error) {
+    console.log('Status check failed:', error);
+  }
+}
+
+// Initialize system status check
+document.addEventListener('DOMContentLoaded', function() {
+  checkSystemStatus();
+  setInterval(checkSystemStatus, 60000); // Check every minute
+});
+
+// Copy to clipboard functionality for tutorial steps
+document.addEventListener('DOMContentLoaded', function() {
+  const tutorialSteps = document.querySelectorAll('.tutorial-steps li');
+
+  tutorialSteps.forEach(step => {
+    step.addEventListener('click', function() {
+      const text = this.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        // Show copied feedback
+        const originalText = this.innerHTML;
+        this.innerHTML = '<i class="fas fa-check step-icon"></i><span style="color: var(--success-color);">Copied to clipboard!</span>';
+
+        setTimeout(() => {
+          this.innerHTML = originalText;
+        }, 2000);
+      }).catch(err => {
+        console.log('Copy failed:', err);
+      });
+    });
+  });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,3 @@
+wallet,cert_id,name,ipfs_uri
+0x0472824c52dcf3cd2dc2fe589d7fb7ba57788892,CERT-801,Alice Smith,ipfs://QmTestCert801
+0x0472824c52dcf3cd2dc2fe589d7fb7ba57788892,CERT-802,Bob Jones,ipfs://QmTestCert802

@@ -1,0 +1,443 @@
+{% extends "layout.html" %}
+{% block title %}Contract Information - Animus-Lens{% endblock %}
+{% block content %}
+
+<style>
+/* --- Hero Section Specific Dark Mode Override --- */
+[data-theme="dark"] .animation-hero {
+  background: #0f172a;
+}
+
+/* --- 3D Animated Boxes Styles --- */
+.animation-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.icontainer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  width: 20em;
+  height: 20em;
+}
+
+.holder {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) translate3d(0em, 3em, 1.5em);
+  transform-style: preserve-3d;
+  width: 100%;
+  height: 100%;
+}
+
+.holder:nth-child(2) {
+  transform: translate(-50%, -50%) rotateY(-90deg) rotateX(90deg) translate3d(0, 3em, 1.5em);
+}
+.holder:nth-child(3) {
+  transform: translate(-50%, -50%) rotateZ(-90deg) rotateX(-90deg) translate3d(0, 3em, 1.5em);
+}
+
+.box {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-style: preserve-3d;
+  animation: ani-box 6s infinite ease-in-out;
+  width: 3em;
+  height: 3em;
+}
+
+.box:before,
+.box:after {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  content: "";
+}
+
+.holder:nth-child(1) .box { background-color: rgba(99, 102, 241, 0.5); }
+.holder:nth-child(1) .box:before { background-color: rgba(79, 70, 229, 0.5); }
+.holder:nth-child(1) .box:after { background-color: rgba(139, 92, 246, 0.5); }
+
+.holder:nth-child(2) .box { background-color: rgba(100, 255, 218, 0.5); }
+.holder:nth-child(2) .box:before { background-color: rgba(94, 234, 212, 0.5); }
+.holder:nth-child(2) .box:after { background-color: rgba(176, 222, 159, 0.5); }
+
+.holder:nth-child(3) .box { background-color: rgba(239, 68, 68, 0.5); }
+.holder:nth-child(3) .box:before { background-color: rgba(220, 38, 38, 0.5); }
+.holder:nth-child(3) .box:after { background-color: rgba(240, 139, 172, 0.5); }
+
+.box:before {
+  left: 100%;
+  bottom: 0;
+  transform: rotateY(90deg);
+  transform-origin: 0 50%;
+}
+.box:after {
+  left: 0;
+  bottom: 100%;
+  transform: rotateX(90deg);
+  transform-origin: 0 100%;
+}
+
+@keyframes ani-box {
+  0%, 100% { transform: translate3d(0, 0, 0) scale3d(1, 1, 1); }
+  16.66% { transform: translate3d(-3em, 0, 0) scale3d(0.85, 0.85, 1.1); }
+  33.33% { transform: translate3d(-3em, -3em, 0) scale3d(1.1, 0.85, 0.85); }
+  50% { transform: translate3d(0, -3em, 0) scale3d(0.85, 1.1, 0.85); }
+  66.66% { transform: translate3d(0, -3em, -3em) scale3d(0.85, 0.85, 1.1); }
+  83.33% { transform: translate3d(0, 0, -3em) scale3d(1.1, 0.85, 0.85); }
+}
+
+@media (max-width: 992px) {
+  .icontainer {
+    width: 15em;
+    height: 15em;
+    perspective: 800px;
+  }
+  .box {
+    animation-duration: 7s;
+  }
+}
+
+@media (max-width: 768px) {
+  .animation-bg {
+    display: none;
+  }
+}
+
+/* --- Hero Section Styles --- */
+.animation-hero {
+  position: relative;
+  width: 100%;
+  min-height: 50vh;
+  background: #0f172a;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 4rem 0;
+  z-index: 0;
+}
+
+.animation-hero .hero-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  padding: 1.5rem;
+  border-radius: 12px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.hero-title {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  color: #f8fafc;
+}
+
+.hero-subtitle {
+  font-size: 1rem;
+  color: #94a3b8;
+}
+
+/* ---------- INFO CARD ---------- */
+.info-card {
+  background: #1e293b;
+  border-radius: 12px;
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 2rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+  position: relative;
+}
+
+.info-card:hover {
+  transform: translateY(-3px);
+  border-color: #38bdf8;
+}
+
+.info-header { 
+  display: flex; 
+  align-items: center; 
+  margin-bottom: 1.5rem; 
+}
+.info-icon { 
+  width: 50px; 
+  height: 50px; 
+  border-radius: 50%; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  color: white; 
+  font-size: 1.25rem; 
+  margin-right: 1rem; 
+  background: #2563eb; 
+}
+.info-header h3 { 
+  margin: 0; 
+  font-weight: 700; 
+  color: #f8fafc; 
+}
+.info-item { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  padding: 1rem 0; 
+  border-bottom: 1px solid #334155; 
+}
+.info-item:last-child { 
+  border-bottom: none; 
+}
+.info-label { 
+  font-weight: 600; 
+  display: flex; 
+  align-items: center; 
+  color: #e2e8f0; 
+}
+.info-label i { 
+  margin-right: 0.5rem; 
+  color: #38bdf8; 
+  width: 16px; 
+}
+.info-value { 
+  color: #cbd5e1; 
+  font-family: 'Monaco', monospace; 
+  font-size: 0.9rem; 
+  text-align: right; 
+  max-width: 60%; 
+  word-break: break-all; 
+}
+.copy-btn { 
+  background: #2563eb; 
+  color: white; 
+  border: none; 
+  padding: 0.4rem 0.8rem; 
+  border-radius: 6px; 
+  cursor: pointer; 
+  font-size: 0.8rem; 
+  margin-left: 0.5rem; 
+  transition: background 0.2s ease; 
+}
+.copy-btn:hover { 
+  background: #1d4ed8; 
+}
+.copy-btn.copied { 
+  background: #16a34a; 
+}
+
+.status-indicator { 
+  display: inline-flex; 
+  align-items: center; 
+  padding: 0.5rem 1rem; 
+  border-radius: 9999px; 
+  font-weight: 600; 
+  font-size: 0.9rem; 
+  margin-bottom: 1rem; 
+}
+.status-online { 
+  background: rgba(16, 185, 129, 0.15); 
+  color: #4ade80; 
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+.status-offline { 
+  background: rgba(239, 68, 68, 0.15); 
+  color: #f87171; 
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+.status-dot { 
+  width: 8px; 
+  height: 8px; 
+  border-radius: 50%; 
+  margin-right: 0.5rem; 
+  animation: pulse 2s infinite;
+}
+.status-dot.online { background: #4ade80; }
+.status-dot.offline { background: #f87171; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+/* Action Buttons */
+.action-buttons { 
+  display: flex; 
+  gap: 1rem; 
+  flex-wrap: wrap; 
+  justify-content: center; 
+  margin-top: 2rem; 
+}
+.btn-local, .btn-home { 
+  padding: 0.75rem 1.5rem; 
+  border-radius: 8px; 
+  display: flex; 
+  align-items: center; 
+  gap: 0.5rem; 
+  font-weight: 600; 
+  text-decoration: none; 
+  border: none; 
+  color: white; 
+}
+.btn-local { 
+  background: #1e293b; 
+  border: 1px solid #38bdf8; 
+  color: #38bdf8; 
+}
+.btn-local:hover { 
+  background: #0f172a; 
+  color: #7dd3fc; 
+}
+.btn-home { 
+  background: #2563eb; 
+}
+.btn-home:hover { 
+  background: #1d4ed8; 
+}
+
+@media(max-width: 768px){
+  .info-item { flex-direction: column; align-items: flex-start; }
+  .info-value { max-width: 100%; text-align: left; margin-top: 0.5rem; }
+  .action-buttons { flex-direction: column; }
+  .btn-local, .btn-home { width: 100%; max-width: 300px; justify-content: center; }
+}
+</style>
+
+<!-- Hero Section -->
+<section class="animation-hero position-relative">
+  <div class="animation-bg">
+    <div class="icontainer">
+      <div class="holder"><div class="box"></div></div>
+      <div class="holder"><div class="box"></div></div>
+      <div class="holder"><div class="box"></div></div>
+    </div>
+  </div>
+
+  <div class="container hero-content">
+    <h1 class="hero-title">Smart Contract Information</h1>
+    <p class="hero-subtitle">
+      GoChain Testnet deployment details and RPC configuration
+    </p>
+  </div>
+</section>
+
+<!-- Contract Info Cards -->
+<div class="container my-5">
+  <div class="info-card">
+    <div class="info-header">
+      <div class="info-icon"><i class="fas fa-file-contract"></i></div>
+      <h3>Contract Details</h3>
+    </div>
+    <div class="info-item">
+      <div class="info-label"><i class="fas fa-map-marker-alt"></i>Contract Address</div>
+      <div class="info-value">{{ CONTRACT_ADDRESS }}
+        <button class="copy-btn" onclick="copyToClipboard('{{ CONTRACT_ADDRESS }}', this)"><i class="fas fa-copy"></i></button>
+      </div>
+    </div>
+    <div class="info-item">
+      <div class="info-label"><i class="fas fa-network-wired"></i>Network</div>
+      <div class="info-value">GoChain Testnet</div>
+    </div>
+    <div class="info-item">
+      <div class="info-label"><i class="fas fa-link"></i>Chain ID</div>
+      <div class="info-value">31337</div>
+    </div>
+    <div class="info-item">
+      <div class="info-label"><i class="fas fa-gas-pump"></i>Gas Token</div>
+      <div class="info-value">GO (Testnet)</div>
+    </div>
+  </div>
+
+  <div class="info-card">
+    <div class="info-header">
+      <div class="info-icon"><i class="fas fa-globe"></i></div>
+      <h3>Network Configuration</h3>
+    </div>
+    <div class="info-item">
+      <div class="info-label"><i class="fas fa-server"></i>RPC Endpoint</div>
+      <div class="info-value">http://127.0.0.1:8545</div>
+    </div>
+    <div class="info-item">
+      <div class="info-label"><i class="fas fa-microchip"></i>Target Engine</div>
+      <div class="info-value">EVM / GoChain Network</div>
+    </div>
+    <div class="info-item">
+      <div class="info-label"><i class="fas fa-shield-halved"></i>Verification Mode</div>
+      <div class="info-value text-valid">On-Chain Hash & OCR Forensics</div>
+    </div>
+  </div>
+
+  <div class="action-buttons">
+    <a href="{{ url_for('verify') }}" class="btn-local"><i class="fas fa-shield-alt"></i>Open Verifier</a>
+    <a href="{{ url_for('index') }}" class="btn-home"><i class="fas fa-home"></i>Back to Home</a>
+  </div>
+
+  <!-- Network Status Indicator -->
+  <div class="text-center mt-5">
+    <div class="status-indicator" id="pageNetworkStatus">
+      <span class="status-dot" id="pageStatusDot"></span>
+      <span id="pageStatusText">Checking GoChain Testnet status...</span>
+    </div>
+  </div>
+</div>
+
+<script>
+async function copyToClipboard(text, button){
+  try {
+    await navigator.clipboard.writeText(text);
+    const original = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-check"></i>';
+    button.classList.add('copied');
+    setTimeout(() => {
+      button.innerHTML = original;
+      button.classList.remove('copied');
+    }, 2000);
+  } catch(e) { 
+    console.error(e); 
+  }
+}
+
+async function checkPageNetworkStatus(){
+  const statusIndicator = document.getElementById('pageNetworkStatus');
+  const statusDot = document.getElementById('pageStatusDot');
+  const statusText = document.getElementById('pageStatusText');
+
+  try {
+    const response = await fetch("http://127.0.0.1:8545", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", method: "eth_blockNumber", params: [], id: 1 })
+    });
+    
+    if (response.ok) {
+      statusIndicator.className = 'status-indicator status-online';
+      statusDot.className = 'status-dot online';
+      statusText.textContent = 'GoChain Testnet Connected (Chain 31337)';
+    } else {
+      throw new Error('RPC response not ok');
+    }
+  } catch(err) {
+    statusIndicator.className = 'status-indicator status-offline';
+    statusDot.className = 'status-dot offline';
+    statusText.textContent = 'GoChain Testnet Inactive (http://127.0.0.1:8545)';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  checkPageNetworkStatus();
+  setInterval(checkPageNetworkStatus, 15000);
+});
+</script>
+
+{% endblock %}

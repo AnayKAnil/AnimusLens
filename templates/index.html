@@ -1,0 +1,387 @@
+{% extends "layout.html" %}
+{% block title %}SECURE-Cert - Blockchain Certificate Verification{% endblock %}
+{% block content %}
+
+<style>
+/* --- Hero Section Specific Dark Mode Override --- */
+/* This rule specifically targets the hero section in dark mode */
+[data-theme="dark"] .hero-section {
+    background: var(--dark-color); /* Use the main dark background color */
+    /* Or use a specific black: background: #000000; */
+    /* Or use a very dark gradient: background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%); */
+}
+
+/* --- 3D Animated Boxes Styles --- */
+.animation-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0; /* Behind content */
+  pointer-events: none; /* Prevent blocking clicks on content */
+  /* Optional: Add a subtle fade effect if needed */
+  /* opacity: 0.3; */
+}
+
+.icontainer {
+  position: absolute;
+  top: 50%; /* Center vertically */
+  left: 50%; /* Center horizontally */
+  transform: translate(-50%, -50%); /* Correctly center the container */
+  /* Adjust perspective for better 3D effect relative to container size */
+  perspective: 1000px; /* Start with a moderate perspective */
+  transform-style: preserve-3d; /* Important for 3D children */
+  width: 20em; /* Adjust base size, use em for relative scaling */
+  height: 20em; /* Adjust base size */
+  /* Optional: Add a subtle animation to the container itself */
+  /* animation: rotateContainer 30s linear infinite; */
+}
+
+/* Optional: Rotate the whole container slowly */
+/*
+@keyframes rotateContainer {
+  from { transform: translate(-50%, -50%) rotateY(0deg) rotateX(10deg); }
+  to { transform: translate(-50%, -50%) rotateY(360deg) rotateX(10deg); }
+}
+*/
+
+.holder {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) translate3d(0em, 3em, 1.5em); /* Initial offset */
+  transform-style: preserve-3d;
+  width: 100%;
+  height: 100%;
+}
+
+.holder:nth-child(2) {
+  transform: translate(-50%, -50%) rotateY(-90deg) rotateX(90deg) translate3d(0, 3em, 1.5em); /* Side face */
+}
+.holder:nth-child(3) {
+  transform: translate(-50%, -50%) rotateZ(-90deg) rotateX(-90deg) translate3d(0, 3em, 1.5em); /* Top face */
+}
+
+/* Box styling */
+.box {
+  position: absolute;
+  top: 0; /* Start from top-left of holder */
+  left: 0;
+  transform-style: preserve-3d;
+  animation: ani-box 6s infinite ease-in-out; /* Smooth easing */
+  width: 3em;
+  height: 3em;
+  /* Optional: Add a slight glow or border */
+  /* box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); */
+}
+
+.box:before,
+.box:after {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  content: "";
+  /* Use CSS variables for colors if desired, or keep fixed */
+  /* background-color: var(--primary-color); */
+  /* background-color: var(--secondary-color); */
+  /* background-color: var(--success-color); */
+}
+
+/* Example fixed colors for each face using global CSS variables */
+.holder:nth-child(1) .box { background-color: rgba(99, 102, 241, 0.5); } /* --primary-color */
+.holder:nth-child(1) .box:before { background-color: rgba(79, 70, 229, 0.5); } /* --primary-dark */
+.holder:nth-child(1) .box:after { background-color: rgba(139, 92, 246, 0.5); } /* --primary-light */
+
+.holder:nth-child(2) .box { background-color: rgba(100, 255, 218, 0.5); } /* --secondary-color */
+.holder:nth-child(2) .box:before { background-color: rgba(94, 234, 212, 0.5); } /* --secondary-color alt */
+.holder:nth-child(2) .box:after { background-color: rgba(176, 222, 159, 0.5); } /* Feature 2 Alt */
+
+.holder:nth-child(3) .box { background-color: rgba(239, 68, 68, 0.5); } /* --error-color */
+.holder:nth-child(3) .box:before { background-color: rgba(220, 38, 38, 0.5); } /* --error-color alt */
+.holder:nth-child(3) .box:after { background-color: rgba(240, 139, 172, 0.5); } /* Feature 3 Alt */
+
+
+.box:before {
+  left: 100%;
+  bottom: 0;
+  transform: rotateY(90deg);
+  transform-origin: 0 50%;
+}
+.box:after {
+  left: 0;
+  bottom: 100%;
+  transform: rotateX(90deg);
+  transform-origin: 0 100%;
+}
+
+/* Animation keyframes for individual boxes */
+@keyframes ani-box {
+  0%, 100% { transform: translate3d(0, 0, 0) scale3d(1, 1, 1); }
+  16.66% { transform: translate3d(-3em, 0, 0) scale3d(0.85, 0.85, 1.1); }
+  33.33% { transform: translate3d(-3em, -3em, 0) scale3d(1.1, 0.85, 0.85); }
+  50% { transform: translate3d(0, -3em, 0) scale3d(0.85, 1.1, 0.85); }
+  66.66% { transform: translate3d(0, -3em, -3em) scale3d(0.85, 0.85, 1.1); }
+  83.33% { transform: translate3d(0, 0, -3em) scale3d(1.1, 0.85, 0.85); }
+}
+
+/* --- Responsive Adjustments --- */
+
+/* Tablet and smaller desktop */
+@media (max-width: 992px) {
+  .icontainer {
+    width: 15em; /* Smaller container */
+    height: 15em;
+    perspective: 800px; /* Adjust perspective */
+  }
+  /* Optionally, slow down animation on medium screens */
+  .box {
+    animation-duration: 7s; /* Slightly slower */
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .animation-bg {
+    /* Consider hiding the complex 3D animation on mobile */
+    display: none; /* Un-comment this line to hide on mobile */
+  }
+  /* If you want to keep it, make it much smaller */
+  /*
+  .icontainer {
+    width: 10em;
+    height: 10em;
+    perspective: 500px;
+  }
+  .box {
+    width: 2em;
+    height: 2em;
+    animation-duration: 8s;
+  }
+  */
+}
+
+@media (max-width: 576px) {
+  /* Keep the animation-bg hidden or very small */
+  /*
+  .icontainer {
+    width: 8em;
+    height: 8em;
+    perspective: 400px;
+  }
+  */
+}
+
+</style>
+
+<!-- Hero Section -->
+<section class="hero-section position-relative">
+  <!-- Animated Boxes Background -->
+  <div class="animation-bg">
+    <div class="icontainer">
+      <div class="holder"><div class="box"></div></div>
+      <div class="holder"><div class="box"></div></div>
+      <div class="holder"><div class="box"></div></div>
+    </div>
+    <!-- Floating Animus Logo -->
+  <div class="floating-logo">
+    <img src="{{ url_for('static', filename='animus-logo.png') }}" alt="ANIMUS Logo">
+  </div>
+  </div>
+
+  <!-- Hero Content (Z-index higher than animation-bg) -->
+  <div class="container position-relative">
+    <div class="row align-items-center">
+      <div class="col-lg-6" data-aos="fade-right">
+        <div class="hero-content">
+          <div class="hero-badge">
+            <i class="fas fa-cube"></i>
+            Blockchain Innovation
+          </div>
+          <h1 class="hero-title">
+            Secure Certificate
+            <span class="gradient-text">Verification</span>
+            on Blockchain
+          </h1>
+          <p class="hero-description">
+            Revolutionary blockchain-powered system ensuring immutable, transparent, and instantly verifiable digital certificates. Say goodbye to certificate fraud forever.
+          </p>
+          <div class="hero-stats">
+            <div class="stat">
+              <span class="stat-number">100%</span>
+              <span class="stat-label">Tamper-Proof</span>
+            </div>
+            <div class="stat">
+              <span class="stat-number"><3s</span>
+              <span class="stat-label">Verification</span>
+            </div>
+            <div class="stat">
+              <span class="stat-number">24/7</span>
+              <span class="stat-label">Available</span>
+            </div>
+          </div>
+          <div class="hero-actions">
+            <a href="{{ url_for('issue') }}" class="btn btn-primary btn-lg hero-btn">
+              <i class="fas fa-plus-circle"></i>
+              Issue Certificate
+            </a>
+            <a href="{{ url_for('verify') }}" class="btn btn-primary btn-lg hero-btn">
+              <i class="fas fa-search"></i>
+              Verify Certificate
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6 d-none d-lg-block" data-aos="fade-left"> <!-- Hide visual on mobile -->
+        <div class="hero-visual">
+          <div class="blockchain-visual">
+            <div class="block block-1">
+              <i class="fas fa-cube"></i>
+            </div>
+            <div class="block block-2">
+              <i class="fas fa-cube"></i>
+            </div>
+            <div class="block block-3">
+              <i class="fas fa-cube"></i>
+            </div>
+            <div class="connection-line line-1"></div>
+            <div class="connection-line line-2"></div>
+          </div>
+          <div class="floating-icons">
+            <div class="floating-icon icon-1">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="floating-icon icon-2">
+              <i class="fas fa-lock"></i>
+            </div>
+            <div class="floating-icon icon-3">
+              <i class="fas fa-certificate"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- Features Section -->
+<section class="features-section py-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-12 text-center mb-5" data-aos="fade-up">
+        <h2 class="section-title">Cutting-Edge Features</h2>
+        <p class="section-subtitle">Experience the future of certificate verification</p>
+      </div>
+    </div>
+    <div class="row g-4">
+      <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-lock"></i>
+          </div>
+          <h4>Immutable Storage</h4>
+          <p>Certificate hashes stored on Ethereum blockchain cannot be altered, ensuring permanent authenticity.</p>
+          <div class="feature-tech">
+            <span class="tech-tag">Ethereum</span>
+            <span class="tech-tag">SHA-256</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-bolt"></i>
+          </div>
+          <h4>Lightning Fast</h4>
+          <p>Instant verification with real-time blockchain queries. Get results in under 3 seconds.</p>
+          <div class="feature-tech">
+            <span class="tech-tag">Web3.py</span>
+            <span class="tech-tag">Infura</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-globe"></i>
+          </div>
+          <h4>Decentralized</h4>
+          <p>No single point of failure. Powered by the global Ethereum network infrastructure.</p>
+          <div class="feature-tech">
+            <span class="tech-tag">Solidity</span>
+            <span class="tech-tag">Smart Contract</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="how-it-works py-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-12 text-center mb-5" data-aos="fade-up">
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-subtitle">Simple process, powerful results</p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-6 mb-4" data-aos="fade-right">
+        <div class="process-card issue-process">
+          <div class="process-header">
+            <div class="process-number">1</div>
+            <h4>Issue Certificate</h4>
+          </div>
+          <div class="process-steps">
+            <div class="step">
+              <i class="fas fa-upload step-icon"></i>
+              <span>Upload certificate file (PDF/JPG)</span>
+            </div>
+            <div class="step">
+              <i class="fas fa-fingerprint step-icon"></i>
+              <span>Generate SHA-256 hash</span>
+            </div>
+            <div class="step">
+              <i class="fas fa-cube step-icon"></i>
+              <span>Store hash on Ethereum blockchain</span>
+            </div>
+            <div class="step">
+              <i class="fas fa-tag step-icon"></i>
+              <span>Receive unique Certificate ID</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6 mb-4" data-aos="fade-left">
+        <div class="process-card verify-process">
+          <div class="process-header">
+            <div class="process-number">2</div>
+            <h4>Verify Certificate</h4>
+          </div>
+          <div class="process-steps">
+            <div class="step">
+              <i class="fas fa-key step-icon"></i>
+              <span>Enter Certificate ID</span>
+            </div>
+            <div class="step">
+              <i class="fas fa-file step-icon"></i>
+              <span>Upload certificate to verify</span>
+            </div>
+            <div class="step">
+              <i class="fas fa-calculator step-icon"></i>
+              <span>Compute file hash</span>
+            </div>
+            <div class="step">
+              <i class="fas fa-check-circle step-icon"></i>
+              <span>Compare with blockchain record</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
