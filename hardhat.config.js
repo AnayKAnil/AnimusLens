@@ -1,1 +1,1 @@
-export default { solidity: '0.8.20' };
+export default { solidity: { version: '0.8.20', settings: { evmVersion: 'shanghai' } } };

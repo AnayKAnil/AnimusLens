@@ -6,7 +6,7 @@ import json
 import time
 import hashlib
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from pymongo import MongoClient
@@ -22,7 +22,7 @@ os.environ['EASYOCR_MODULE_PATH'] = str(BASE / '.EasyOCR')
 # Load environment variables from .env
 load_dotenv(BASE / '.env')
 
-# Optional local utils import (retained for backward compatibility)
+# Optional local utils import
 try:
     from cert_utils import compute_sha256_hex, analyze_certificate_ai
 except ImportError:
@@ -61,23 +61,37 @@ except Exception as e:
 INFURA_URL = os.getenv("INFURA_URL", "http://127.0.0.1:8545")
 w3 = Web3(Web3.HTTPProvider(INFURA_URL))
 
-CONTRACT_ADDRESS = os.getenv("CONTRACT_ADDRESS", "0x5FbDB2315678afecb367f032d93F642f64180aa3")
-CONTRACT_ADDRESS = w3.to_checksum_address(CONTRACT_ADDRESS.lower().strip())
+# Inject POA/EVM middleware if present
+try:
+    from web3.middleware import ExtraDataToPOAMiddleware
+    w3.middleware_onion.inject(ExtraDataToPOAMiddleware, layer=0)
+except Exception:
+    try:
+        from web3.middleware import geth_poa_middleware
+        w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+    except Exception:
+        pass
 
 ABI_FILE = BASE / "contract_abi.json"
 DEPLOYED_FILE = BASE / "deploy" / "deployed_contract.json"
 
-if ABI_FILE.exists():
-    with open(ABI_FILE, "r") as f:
-        ABI = json.load(f)
-elif DEPLOYED_FILE.exists():
+ABI = None
+CONTRACT_ADDRESS = None
+
+if DEPLOYED_FILE.exists():
     with open(DEPLOYED_FILE, "r") as f:
         data = json.load(f)
-        CONTRACT_ADDRESS = w3.to_checksum_address(data.get("address", CONTRACT_ADDRESS))
+        CONTRACT_ADDRESS = data.get("address")
         ABI = data.get("abi")
-else:
-    raise SystemExit("Missing contract_abi.json. Place the copied ABI from Remix in the project root.")
 
+if not ABI and ABI_FILE.exists():
+    with open(ABI_FILE, "r") as f:
+        ABI = json.load(f)
+
+if not CONTRACT_ADDRESS:
+    CONTRACT_ADDRESS = os.getenv("CONTRACT_ADDRESS", "0x5FbDB2315678afecb367f032d93F642f64180aa3")
+
+CONTRACT_ADDRESS = Web3.to_checksum_address(CONTRACT_ADDRESS.strip())
 contract = w3.eth.contract(address=CONTRACT_ADDRESS, abi=ABI)
 
 # Initialize OCR Engine
@@ -88,7 +102,7 @@ ocr_reader = easyocr.Reader(['en'], gpu=False)
 def timestamp_format(ts):
     if ts is None or ts == 0:
         return "N/A"
-    return datetime.fromtimestamp(ts).strftime("%B %d, %Y, %I:%M:%S %p")
+    return datetime.fromtimestamp(ts, tz=timezone.utc).strftime("%B %d, %Y, %I:%M:%S %p")
 
 # --- Transaction Management (Local Backup) ---
 def load_transactions():
@@ -146,7 +160,7 @@ def register():
                 "name": name,
                 "email": email,
                 "password_hash": generate_password_hash(password),
-                "created_at": datetime.utcnow()
+                "created_at": datetime.now(timezone.utc)
             })
             flash("Registration successful! Please log in.", "success")
             return redirect(url_for("login"))
@@ -184,7 +198,6 @@ def logout():
 # --- Issuance Portal ---
 @app.route("/issue", methods=["GET"])
 def issue():
-    # 1. Enforce login check: bounces unauthenticated visitors to /login
     if "institution_id" not in session:
         flash("Please log in as an authorized institution to issue credentials.", "warning")
         return redirect(url_for("login"))
@@ -237,7 +250,7 @@ def batch_issue_csv():
 
     for row in reader:
         try:
-            wallet_addr = w3.to_checksum_address(row["wallet"].strip().lower())
+            wallet_addr = Web3.to_checksum_address(row["wallet"].strip())
             cert_id = str(row["cert_id"]).strip()
             name = row.get("name", "").strip()
             ipfs_uri = row.get("ipfs_uri", f"ipfs://animus/{cert_id}").strip()
@@ -280,7 +293,7 @@ def save_tx():
                 "degree": degree,
                 "tx_hash": tx_hash,
                 "issued_by": session.get("institution_name", "Authorized Institution"),
-                "issued_at": datetime.utcnow()
+                "issued_at": datetime.now(timezone.utc)
             })
         except Exception as e:
             print(f"MongoDB save_tx error: {e}")
@@ -303,7 +316,6 @@ def verify():
         save_path = UPLOAD_FOLDER / filename
         file.save(save_path)
 
-        # 1. OCR Extraction
         ocr_results = ocr_reader.readtext(str(save_path), detail=0)
         extracted_text = " ".join(ocr_results)
         print(f"\n[OCR Text Extracted]: {extracted_text}")
@@ -325,32 +337,43 @@ def verify():
             flash("Could not detect a Certificate ID from the image. Please enter it manually.", "warning")
             return redirect(url_for("verify"))
 
-        # 2. Blockchain Registry Lookup (Graceful error handling)
+        # Blockchain Registry Lookup
         onchain_found = False
         onchain_digest_hex = ""
         timestamp = 0
         revoked = False
         txid = "N/A"
 
-        try:
-            onchain = contract.functions.getCert(str(cert_id)).call()
-            onchain_digest = onchain[0]
-            timestamp = onchain[1]
-            revoked = onchain[2]
-            txid = onchain[3]
+        candidates = [str(cert_id)]
+        numeric_only = re.sub(r'[^0-9]', '', str(cert_id))
+        if numeric_only and numeric_only not in candidates:
+            candidates.append(numeric_only)
+        if not str(cert_id).startswith("CERT-") and numeric_only:
+            candidates.append(f"CERT-{numeric_only}")
 
-            if isinstance(onchain_digest, bytes):
-                onchain_digest_hex = onchain_digest.hex().lower().removeprefix("0x")
-            elif isinstance(onchain_digest, str):
-                onchain_digest_hex = onchain_digest.lower().strip().removeprefix("0x")
+        for candidate_id in candidates:
+            try:
+                onchain = contract.functions.getCert(candidate_id).call()
+                digest_val = onchain[0]
 
-            if onchain_digest_hex and onchain_digest_hex != ("0" * 64):
-                onchain_found = True
-        except Exception as e:
-            print(f"\n[Blockchain Lookup Error]: {e}\n")
-            onchain_found = False
+                if isinstance(digest_val, bytes):
+                    hex_val = digest_val.hex().lower().removeprefix("0x")
+                elif isinstance(digest_val, str):
+                    hex_val = digest_val.lower().strip().removeprefix("0x")
+                else:
+                    hex_val = ""
 
-        # Non-existent ID renders the red card directly without looping
+                if hex_val and hex_val != ("0" * 64):
+                    onchain_digest_hex = hex_val
+                    timestamp = onchain[1]
+                    revoked = onchain[2]
+                    txid = onchain[3]
+                    onchain_found = True
+                    cert_id = candidate_id
+                    break
+            except Exception as e:
+                print(f"[Lookup attempt failed for '{candidate_id}']: {e}")
+
         if not onchain_found:
             ai_data["tampering_detected"] = True
             ai_data["confidence_score"] = 0
@@ -369,7 +392,6 @@ def verify():
                 ai_data=ai_data
             )
 
-        # 3. Validation Logic
         clean_extracted = extracted_text.lower().strip()
         has_ocr_text = len(clean_extracted) > 0
 

@@ -1,5 +1,5 @@
 {
-  "address": "0x27D1215D95aA102803A76290172D9aBD10E2Db3C",
+  "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
   "abi": [
     {
       "inputs": [],
@@ -139,10 +139,5 @@
       "stateMutability": "nonpayable",
       "type": "function"
     }
-  ],
-  "deployment_tx": "0xb016aa332d5c8d5c2963fc00d575504b65592fcd65644c9bfb0f18cc0a5e848b",
-  "deployment_block": 9291713,
-  "gas_used": 755138,
-  "network": "sepolia",
-  "chain_id": 11155111
+  ]
 }

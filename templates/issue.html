@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% block title %}Issue Certificate - SECURE-Cert{% endblock %}
+{% block title %}Issue Certificate - AnimusLens{% endblock %}
 {% block content %}
 <style>
 /* --- Hero Section Specific Dark Mode Override --- */
@@ -190,7 +190,7 @@
     <div class="row justify-content-center">
       <div class="col-lg-8 col-xl-6">
 
-        <!-- Card 1: Single Certificate Issuance -->
+        <!-- Card: Single Certificate Issuance -->
         <div class="form-container mb-4" data-aos="fade-up" role="region" aria-labelledby="formHeader">
           <div class="form-header">
             <div class="form-icon">
@@ -202,24 +202,17 @@
           
           <form method="post" enctype="multipart/form-data" class="certificate-form" id="issueForm">
             <div class="form-group">
-              <label class="form-label" for="student_wallet">
-                <i class="fas fa-wallet" aria-hidden="true"></i> Student Wallet Address
-              </label>
-              <input type="text" id="student_wallet" class="form-control" placeholder="0x..." required>
-            </div>
-
-            <div class="form-group">
               <label class="form-label" for="cert_id">
                 <i class="fas fa-tag" aria-hidden="true"></i> Certificate ID
               </label>
-              <input type="text" name="cert_id" id="cert_id" class="form-control" placeholder="e.g. CERT-101" required>
+              <input type="text" name="cert_id" id="cert_id" class="form-control" placeholder="e.g. 101 or CERT-101" required>
             </div>
 
             <div class="form-group">
               <label class="form-label" for="txid_note">
                 <i class="fas fa-sticky-note" aria-hidden="true"></i> Metadata / IPFS URI
               </label>
-              <input type="text" name="txid_note" id="txid_note" class="form-control" placeholder="ipfs://Qm... or student identifier">
+              <input type="text" name="txid_note" id="txid_note" class="form-control" placeholder="ipfs://Qm... or identifier">
             </div>
 
             <div class="form-group">
@@ -267,33 +260,6 @@
           <div id="statusMessage" class="toast-container" role="alert" aria-live="assertive"></div>
         </div>
 
-        <!-- Card 2: Automated Batch CSV Issuance -->
-        <div class="form-container" data-aos="fade-up" data-aos-delay="100">
-          <div class="form-header">
-            <div class="form-icon">
-              <i class="fas fa-layer-group" aria-hidden="true"></i>
-            </div>
-            <h2>Automated Batch Issuance</h2>
-            <p>Upload a roster CSV to issue dozens or hundreds of certificates in a single transaction</p>
-          </div>
-
-          <form id="batchForm">
-            <div class="form-group mb-3">
-              <label class="form-label" for="csvFile">
-                <i class="fas fa-file-csv"></i> Select Graduate Roster (.csv)
-              </label>
-              <input type="file" id="csvFile" name="csv_file" class="form-control" accept=".csv" required />
-              <div class="form-text text-muted mt-2">
-                Header columns required: <code>wallet, cert_id, name, ipfs_uri</code>
-              </div>
-            </div>
-            <button type="button" class="btn btn-success btn-submit" id="batchBtn" onclick="processBatch()">
-              <i class="fas fa-bolt"></i> Process & Batch Mint
-            </button>
-          </form>
-          <div id="batchStatus" class="mt-3"></div>
-        </div>
-
       </div>
     </div>
   </div>
@@ -309,7 +275,6 @@ const fileUploadArea = document.getElementById('fileUploadArea');
 const filePreview = document.getElementById('filePreview');
 const submitBtn = document.getElementById('submitBtn');
 const certIdInput = document.getElementById('cert_id');
-const studentWalletInput = document.getElementById('student_wallet');
 const statusMessage = document.getElementById('statusMessage');
 const processingOverlay = document.getElementById('processingOverlay');
 const stepHash = document.getElementById('stepHash');
@@ -317,12 +282,11 @@ const stepMetaMask = document.getElementById('stepMetaMask');
 const stepBlockchain = document.getElementById('stepBlockchain');
 
 function updateSubmitButton() {
-  const isValid = certIdInput.value.trim() && fileInput.files.length && studentWalletInput.value.trim();
+  const isValid = certIdInput.value.trim() && fileInput.files.length;
   submitBtn.disabled = !isValid;
 }
 
 certIdInput.addEventListener('input', updateSubmitButton);
-studentWalletInput.addEventListener('input', updateSubmitButton);
 fileUploadArea.addEventListener('click', () => fileInput.click());
 
 fileInput.addEventListener('change', function(e) {
@@ -402,10 +366,9 @@ async function initWeb3() {
     const rawChainId = await web3.eth.getChainId();
     const chainId = typeof rawChainId === 'string' ? parseInt(rawChainId, 16) : Number(rawChainId);
 
-    // Allow Local Hardhat (31337) and Sepolia (11155111)
-    const allowedChains = [31337, 11155111];
+    const allowedChains = [31337, 1337, 11155111];
     if (!allowedChains.includes(chainId)) {
-      showMessage('error', 'Please switch your wallet to Hardhat Local (Chain ID 31337).');
+      showMessage('error', 'Please switch MetaMask to Hardhat Local (Chain ID 31337).');
       return false;
     }
 
@@ -419,12 +382,7 @@ async function initWeb3() {
   }
 }
 
-initWeb3().then((success) => {
-  if (success && !studentWalletInput.value) {
-    studentWalletInput.value = userAccount;
-    updateSubmitButton();
-  }
-});
+initWeb3();
 
 function computeFileHash(file) {
   return new Promise((resolve, reject) => {
@@ -438,12 +396,11 @@ function computeFileHash(file) {
   });
 }
 
-// Single Mint Handler
+// Single Mint Handler matching CertRegistry.sol: setCert(string certificateId, bytes32 digest, string txid)
 document.getElementById('issueForm').addEventListener('submit', async function(e) {
   e.preventDefault();
-  const certId = certIdInput.value.trim();
-  const recipient = studentWalletInput.value.trim();
-  const note = document.getElementById('txid_note').value.trim() || `ipfs://animus/${certId}`;
+  const rawCertId = certIdInput.value.trim();
+  const note = document.getElementById('txid_note').value.trim() || `ipfs://animus/${rawCertId}`;
   const file = fileInput.files[0];
 
   if (!web3 || !contract || !userAccount) {
@@ -458,28 +415,35 @@ document.getElementById('issueForm').addEventListener('submit', async function(e
   stepHash.classList.add('active');
 
   try {
-    const digest = await computeFileHash(file);
-    console.log("Computed SHA-256 Digest:", digest);
+    let digest = await computeFileHash(file);
+    if (!digest.startsWith('0x')) {
+      digest = '0x' + digest;
+    }
+    digest = digest.slice(0, 66);
+    console.log("Computed SHA-256 Digest (bytes32):", digest);
+
+    const certId = String(rawCertId);
+    const txNote = String(note);
 
     stepHash.classList.remove('active');
     stepMetaMask.classList.add('active');
 
-    // Estimate gas first to capture the exact revert string
     let gasEstimate;
     try {
-      gasEstimate = await contract.methods.mintCert(recipient, certId, digest, note)
+      gasEstimate = await contract.methods
+        .setCert(certId, digest, txNote)
         .estimateGas({ from: userAccount });
       console.log("Estimated Gas:", gasEstimate);
     } catch (gasErr) {
-      console.error("Gas estimation failed (Contract Revert):", gasErr);
-      throw new Error("Contract call rejected: " + (gasErr.data?.message || gasErr.message));
+      console.warn("Direct gas estimation warning:", gasErr);
+      gasEstimate = 200000;
     }
 
-    // Trigger the transaction in MetaMask
-    const tx = await contract.methods.mintCert(recipient, certId, digest, note)
+    const tx = await contract.methods
+      .setCert(certId, digest, txNote)
       .send({
         from: userAccount,
-        gas: Math.floor(gasEstimate * 1.2)
+        gas: Math.max(Math.floor(Number(gasEstimate) * 1.3), 200000)
       });
 
     console.log("Transaction mined:", tx);
@@ -494,79 +458,17 @@ document.getElementById('issueForm').addEventListener('submit', async function(e
     });
 
     processingOverlay.style.display = 'none';
-    showMessage('success', `Certificate #${certId} successfully minted!`, tx.transactionHash);
+    showMessage('success', `Certificate #${certId} successfully recorded!`, tx.transactionHash);
   } catch (err) {
     console.error("Issuance failed entirely:", err);
     processingOverlay.style.display = 'none';
-    alert("Minting Error: " + err.message);
-    showMessage('error', `Mint failed: ${err.message}`);
+    alert("Recording Error: " + err.message);
+    showMessage('error', `Registration failed: ${err.message}`);
   } finally {
     stepHash.classList.remove('active');
     stepMetaMask.classList.remove('active');
     stepBlockchain.classList.remove('active');
   }
 });
-
-// Automated Batch Mint Handler
-async function processBatch() {
-  const fileInputBatch = document.getElementById('csvFile');
-  const statusDiv = document.getElementById('batchStatus');
-  const batchBtn = document.getElementById('batchBtn');
-
-  if (!fileInputBatch.files.length) {
-    alert('Please upload a roster CSV file first.');
-    return;
-  }
-
-  if (!web3 || !contract || !userAccount) {
-    const initialized = await initWeb3();
-    if (!initialized) return;
-  }
-
-  batchBtn.disabled = true;
-  statusDiv.innerHTML = '<div class="alert alert-info">Parsing roster and hashing credentials on backend...</div>';
-
-  const formData = new FormData();
-  formData.append('csv_file', fileInputBatch.files[0]);
-
-  try {
-    const res = await fetch('/batch_issue_csv', { method: 'POST', body: formData });
-    const data = await res.json();
-
-    if (!res.ok || data.error) {
-      throw new Error(data.error || 'Server error while parsing roster CSV.');
-    }
-
-    statusDiv.innerHTML = `<div class="alert alert-warning">Please sign transaction in MetaMask to batch mint <strong>${data.count}</strong> certificates...</div>`;
-
-    // Calls batchMintCert on-chain in a single transaction
-    const tx = await contract.methods.batchMintCert(
-      data.wallets,
-      data.ids,
-      data.digests,
-      data.uris
-    ).send({ from: userAccount });
-
-    statusDiv.innerHTML = `
-      <div class="alert alert-success">
-        <strong>Batch Mint Complete!</strong> Issued ${data.count} certificates in 1 block.<br>
-        TX: <code>${tx.transactionHash}</code>
-      </div>
-    `;
-
-    for (const id of data.ids) {
-      await fetch('/save_tx', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cert_id: id, tx_hash: tx.transactionHash })
-      });
-    }
-
-  } catch (err) {
-    statusDiv.innerHTML = `<div class="alert alert-danger">Batch issuance failed: ${err.message}</div>`;
-  } finally {
-    batchBtn.disabled = false;
-  }
-}
 </script>
-{% endblock %}`
+{% endblock %}
